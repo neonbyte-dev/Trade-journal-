@@ -14,20 +14,10 @@ ssh root@$DROPLET_IP "mkdir -p $REMOTE_DIR"
 rsync -avz --exclude '__pycache__' --exclude '*.pyc' --exclude '.git' --exclude 'trades.db' \
     ./ root@$DROPLET_IP:$REMOTE_DIR/
 
-# Step 3: Create .env with ENVIRONMENT=digitalocean
-ssh root@$DROPLET_IP "cat > $REMOTE_DIR/.env << 'EOF'
-# Telegram Bot Token
-TELEGRAM_BOT_TOKEN=8092067485:AAFr8nk5_3TLi7w_6vowNJdj1G0gHB0M7hg
-
-# Restrict bot to only your user ID
-ALLOWED_USER_ID=1644767408
-
-# Anthropic API Key (for Claude-powered message parsing)
-ANTHROPIC_API_KEY=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
-
-# Environment indicator
-ENVIRONMENT=digitalocean
-EOF"
+# Step 3: Copy local .env and set ENVIRONMENT=digitalocean
+# NOTE: This copies YOUR local .env file - make sure it has valid credentials
+scp .env root@$DROPLET_IP:$REMOTE_DIR/.env
+ssh root@$DROPLET_IP "echo 'ENVIRONMENT=digitalocean' >> $REMOTE_DIR/.env"
 
 # Step 4: Install dependencies
 ssh root@$DROPLET_IP "cd $REMOTE_DIR && pip3 install python-telegram-bot python-dotenv requests anthropic"
